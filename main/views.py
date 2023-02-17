@@ -4,11 +4,12 @@ from .models import Item
 import stripe
 from rest_framework.views import APIView
 from rest_framework.response import Response
+from decouple import config
 
 
-stripe.api_key = "pk_test_51McWQcDlPs5u4HwiXU90HVvWjuDJjOPFOoQV35sWS44HHELoefCrjSoHdRN4hRfoLfmsZkxSARDuRF4Q412znY0d00t6YkA4M7"
+stripe.api_key = config('STRIPE_KEY')
 # Create your views here.
-# pk_test_a9nwZVa5O7b0xz3lxl318KSU00x1L9ZWsF
+
 
 def item_retrieve(request, id):
     item = Item.objects.get(id=id)
@@ -30,7 +31,7 @@ class BuyItemAPIView(APIView):
                                       product=product['id'],
                                     )
         session = stripe.checkout.Session.create(
-            success_url=reverse('buy-success'),
+            success_url=request.build_absolute_uri(reverse('buy-success')),
             line_items=[
                 {
                     "price": price['id'],
@@ -39,4 +40,5 @@ class BuyItemAPIView(APIView):
             ],
             mode="payment",
         )
-        return Response({'session_id': session['id']})
+        print({'id': session['id']})
+        return Response({'id': session['id']})
