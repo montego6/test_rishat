@@ -21,24 +21,16 @@ def buy_success(request):
 
 
 class BuyItemAPIView(APIView):
-
     def get(self, request, id):
         item = Item.objects.get(id=id)
-        product = stripe.Product.create(name=item.name)
-        price = stripe.Price.create(
-                                      unit_amount=int(item.price*100),
-                                      currency="usd",
-                                      product=product['id'],
-                                    )
         session = stripe.checkout.Session.create(
             success_url=request.build_absolute_uri(reverse('buy-success')),
             line_items=[
                 {
-                    "price": price['id'],
+                    "price": item.stripe.price,
                     "quantity": 1,
                 },
             ],
             mode="payment",
         )
-        print({'id': session['id']})
         return Response({'id': session['id']})
