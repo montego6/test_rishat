@@ -1,3 +1,4 @@
+{% load static %}
 <html>
   <head>
     <title>Buy Item 1</title>
@@ -8,8 +9,8 @@
     <p>Price: {{item.price}}</p>
     <button id="buy-button">Buy</button>
     <script src="https://js.stripe.com/v3/"></script>
+    <script src="{% static 'secrtet.js' %}"></script>
     <script type="text/javascript">
-      var stripe = Stripe('pk_test_a9nwZVa5O7b0xz3lxl318KSU00x1L9ZWsF');
       var buyButton = document.getElementById('buy-button');
       buyButton.addEventListener('click', function() {
         // Create a new Checkout Session using the server-side endpoint
@@ -17,7 +18,7 @@
         console.log('test')
         fetch('/buy/1', {method: 'GET'})
         .then(response => response.json())
-        .then(session => stripe.redirectToCheckout({ sessionId: session.id }))
+        .then(session => stripe.redirectToCheckout({ sessionId: session_id }))
       });
     </script>
   </body>
