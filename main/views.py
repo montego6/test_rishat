@@ -34,3 +34,26 @@ class BuyItemAPIView(APIView):
             mode="payment",
         )
         return Response({'id': session['id']})
+
+
+def add_to_order(request, id):
+    cart = request.session.get('cart', [])
+    if id not in cart:
+        cart.append(id)
+
+
+class MakeOrderAPIView(APIView):
+    def get(self, request, id):
+        item = Item.objects.get(id=id)
+        session = stripe.checkout.Session.create(
+            success_url=request.build_absolute_uri(reverse('buy-success')),
+            line_items=[
+                {
+                    "price": item.stripe.price,
+                    "quantity": 1,
+                },
+            ],
+            mode="payment",
+        )
+        return Response({'id': session['id']})
+

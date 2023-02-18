@@ -27,6 +27,9 @@ class Item(models.Model):
     def get_buy_url(self):
         return reverse('buy-item', kwargs={'id': self.id})
 
+    def add_to_order_url(self):
+        return reverse('add-to-order', kwargs={'id': self.id})
+
 
 class StripeItem(models.Model):
     item = models.OneToOneField(Item, on_delete=models.CASCADE, related_name='stripe')
@@ -35,3 +38,7 @@ class StripeItem(models.Model):
 
     def __str__(self):
         return f'{self.item.name} - {self.item.price}'
+
+
+class Order(models.Model):
+    items = models.ManyToManyField(Item)

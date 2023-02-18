@@ -3,6 +3,7 @@ from . import views
 
 urlpatterns = [
     path('item/<int:id>/', views.item_retrieve, name='item-retrieve'),
+    path('item/<int:id>/add-to-order', views.add_to_order, name='add-to-order'),
     path('buy/<int:id>/', views.BuyItemAPIView.as_view(), name='buy-item'),
     path('buy/success/', views.buy_success, name='buy-success'),
 ]

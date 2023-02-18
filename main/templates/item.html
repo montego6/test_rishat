@@ -19,5 +19,12 @@
         .then(session => stripe.redirectToCheckout({ sessionId: session.id }))
       });
     </script>
+    <button id="add-to-order-button">Add to order</button>
+    <script type="text/javascript">
+      var orderButton = document.getElementById('add-to-order-button');
+      buyButton.addEventListener('click', function() {
+        fetch('{{ item.add_to_order_url }}', {method: 'GET'})
+      });
+    </script>
   </body>
 </html>
