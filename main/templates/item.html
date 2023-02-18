@@ -22,8 +22,18 @@
     <button id="add-to-order-button">Add to order</button>
     <script type="text/javascript">
       var orderButton = document.getElementById('add-to-order-button');
-      buyButton.addEventListener('click', function() {
+      orderButton.addEventListener('click', function() {
         fetch('{{ item.add_to_order_url }}', {method: 'GET'})
+      });
+    </script>
+    <button id="make-order-button">Make order</button>
+    <script type="text/javascript">
+      var stripe = Stripe('pk_test_51McWQcDlPs5u4HwiXU90HVvWjuDJjOPFOoQV35sWS44HHELoefCrjSoHdRN4hRfoLfmsZkxSARDuRF4Q412znY0d00t6YkA4M7')
+      var makeOrderButton = document.getElementById('make-order-button');
+      makeOrderButton.addEventListener('click', function() {
+        fetch('{% url 'make-order' %}', {method: 'GET'})
+        .then(response => response.json())
+        .then(session => stripe.redirectToCheckout({ sessionId: session.id }))
       });
     </script>
   </body>
