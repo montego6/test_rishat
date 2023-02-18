@@ -23,7 +23,19 @@
     <script type="text/javascript">
       var orderButton = document.getElementById('add-to-order-button');
       orderButton.addEventListener('click', function() {
-        fetch('{{ item.add_to_order_url }}', {method: 'GET'})
+        fetch('{{ item.add_to_order_url }}', {method: 'GET'}).then(() => {
+            window.location.reload();
+        })
+      });
+    </script>
+    <button id="clear-order-button">Clear order</button>
+    <script type="text/javascript">
+      var clearOrderButton = document.getElementById('clear-order-button');
+      clearOrderButton.addEventListener('click', function() {
+        fetch('{% url 'clear-order' %}', {method: 'GET'})
+        .then(() => {
+            window.location.reload();
+        })
       });
     </script>
     <button id="make-order-button">Make order</button>
@@ -36,5 +48,12 @@
         .then(session => stripe.redirectToCheckout({ sessionId: session.id }))
       });
     </script>
+    <ul id="order-list">
+      <p>В вашей корзине:</p>
+      {% for item in cart_items %}
+      <li>Item {{item.id}} - {{item.name}}, price: {{item.price}}</li>
+      {% endfor %}
+    </ul>
+
   </body>
 </html>

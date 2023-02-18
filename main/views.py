@@ -16,7 +16,9 @@ stripe.api_key = config('STRIPE_KEY')
 
 def item_retrieve(request, id):
     item = Item.objects.get(id=id)
-    return render(request, 'item.html', {'item': item})
+    cart = request.session.get('cart', [])
+    cart_items = Item.objects.filter(id__in=cart)
+    return render(request, 'item.html', {'item': item, 'cart_items': cart_items})
 
 
 def buy_success(request):
@@ -46,6 +48,11 @@ def add_to_order(request, id):
     request.session['cart'] = cart
     print(cart)
     return JsonResponse({'status': f'{id} added to cart'})
+
+
+def clear_order(request):
+    request.session['cart'] = []
+    return JsonResponse({'status': 'cart is cleared'})
 
 
 class MakeOrderAPIView(APIView):
