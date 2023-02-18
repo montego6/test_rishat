@@ -1,7 +1,7 @@
 from django.shortcuts import render
 from django.urls import reverse
 from django.http import JsonResponse
-from .models import Item, Order, Discount
+from .models import Item, Order, Discount, Tax
 from .serializers import OrderSerializer
 import stripe
 from rest_framework.views import APIView
@@ -27,6 +27,7 @@ def buy_success(request):
 class BuyItemAPIView(APIView):
     def get(self, request, id):
         discount = Discount.objects.get(id=1)
+        tax = Tax.objects.get(id=1)
         item = Item.objects.get(id=id)
         session = stripe.checkout.Session.create(
             success_url=request.build_absolute_uri(reverse('buy-success')),
@@ -34,6 +35,7 @@ class BuyItemAPIView(APIView):
                 {
                     "price": item.stripe.price,
                     "quantity": 1,
+                    'tax_rates': [tax.stripe]
                 },
             ],
             discounts=[{'coupon': discount.stripe}],
