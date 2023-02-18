@@ -12,7 +12,7 @@ class ItemSerializer(serializers.ModelSerializer):
         fields = ('price', 'quantity', 'tax_rates')
 
     def get_tax_rate(self, obj):
-        tax = Tax.objects.get(id=1)
+        tax = Tax.objects.first()
         return [tax.stripe]
 
 

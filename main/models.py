@@ -10,15 +10,28 @@ class Item(models.Model):
     name = models.CharField(max_length=200)
     description = models.TextField()
     price = models.FloatField()
+    currency = models.CharField(max_length=200, default='usd')
 
     def save(self, *args, **kwargs):
         super().save(*args, **kwargs)
         product = stripe.Product.create(name=self.name)
+
+        if self.currency.lower() == 'usd':
+            currency_options = {'eur': {'unit_amount': int(self.price * 0.93 * 100)}}
+        elif self.currency.lower() == 'eur':
+            currency_options = {'usd': {'unit_amount': int(self.price * 1.07 * 100)}}
+        else:
+            currency_options = {}
+
         price = stripe.Price.create(
             unit_amount=int(self.price * 100),
-            currency="usd",
+            currency=self.currency,
             product=product['id'],
+            currency_options=currency_options,
         )
+
+        if not self._state.adding:
+            self.stripe.delete()
         StripeItem.objects.create(item=self, product=product['id'], price=price['id'])
 
     def __str__(self):

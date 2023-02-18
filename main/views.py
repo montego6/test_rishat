@@ -26,8 +26,8 @@ def buy_success(request):
 
 class BuyItemAPIView(APIView):
     def get(self, request, id):
-        discount = Discount.objects.get(id=1)
-        tax = Tax.objects.get(id=1)
+        discount = Discount.objects.first()
+        tax = Tax.objects.first()
         item = Item.objects.get(id=id)
         session = stripe.checkout.Session.create(
             success_url=request.build_absolute_uri(reverse('buy-success')),
@@ -38,6 +38,7 @@ class BuyItemAPIView(APIView):
                     'tax_rates': [tax.stripe]
                 },
             ],
+            currency=item.currency.lower(),
             discounts=[{'coupon': discount.stripe}],
             mode="payment",
         )
@@ -59,7 +60,7 @@ def clear_order(request):
 
 class MakeOrderAPIView(APIView):
     def get(self, request):
-        discount = Discount.objects.get(id=1)
+        discount = Discount.objects.first()
         cart = request.session.get('cart', [])
         if cart:
             items = Item.objects.filter(id__in=cart)
@@ -70,6 +71,7 @@ class MakeOrderAPIView(APIView):
                 success_url=request.build_absolute_uri(reverse('buy-success')),
                 line_items=line_items.data['items'],
                 discounts=[{'coupon': discount.stripe}],
+                currency='usd',
                 mode="payment",
             )
             return Response({'id': session['id']})
