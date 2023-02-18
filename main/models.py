@@ -42,3 +42,31 @@ class StripeItem(models.Model):
 
 class Order(models.Model):
     items = models.ManyToManyField(Item)
+
+
+class Discount(models.Model):
+    discount = models.FloatField()
+    stripe = models.CharField(max_length=100, null=True, blank=True)
+
+    def save(self, *args, **kwargs):
+        coupon = stripe.Coupon.create(percent_off=self.discount)
+        self.stripe = coupon['id']
+        super().save(*args, **kwargs)
+
+    def __str__(self):
+        return self.discount
+
+
+class Tax(models.Model):
+    name = models.CharField(max_length=300)
+    inclusive = models.BooleanField()
+    percentage = models.FloatField()
+    stripe = models.CharField(max_length=100, null=True, blank=True)
+
+    def save(self, *args, **kwargs):
+        tax_rate = stripe.TaxRate.create(display_name=self.name, inclusive=self.inclusive, percentage=self.percentage)
+        self.stripe = tax_rate['id']
+        super().save(*args, **kwargs)
+
+    def __str__(self):
+        return f'{self.name} - {self.percentage}'
