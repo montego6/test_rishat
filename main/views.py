@@ -2,14 +2,15 @@ from django.shortcuts import render
 from django.urls import reverse
 from django.http import JsonResponse
 from .models import Item, Order, Discount, Tax
-from .serializers import OrderSerializer
+from .serializers import OrderSerializer, ItemSerializer
 import stripe
 from rest_framework.views import APIView
 from rest_framework.response import Response
 from decouple import config
 
-
 stripe.api_key = config('STRIPE_KEY')
+
+
 # Create your views here.
 
 
@@ -26,20 +27,12 @@ def buy_success(request):
 
 class BuyItemAPIView(APIView):
     def get(self, request, id):
-        discount = Discount.objects.first()
-        tax = Tax.objects.first()
         item = Item.objects.get(id=id)
+        line_items = ItemSerializer(item).data
         session = stripe.checkout.Session.create(
             success_url=request.build_absolute_uri(reverse('buy-success')),
-            line_items=[
-                {
-                    "price": item.stripe.price,
-                    "quantity": 1,
-                    'tax_rates': [tax.stripe]
-                },
-            ],
+            line_items=[line_items],
             currency=item.currency.lower(),
-            discounts=[{'coupon': discount.stripe}],
             mode="payment",
         )
         return Response({'id': session['id']})
@@ -66,13 +59,20 @@ class MakeOrderAPIView(APIView):
             items = Item.objects.filter(id__in=cart)
             order = Order.objects.create()
             order.items.add(*items)
+            order.discount = discount
+            order.tax = Tax.objects.first()
+            order.save()
             line_items = OrderSerializer(order)
-            session = stripe.checkout.Session.create(
-                success_url=request.build_absolute_uri(reverse('buy-success')),
-                line_items=line_items.data['items'],
-                discounts=[{'coupon': discount.stripe}],
-                currency='usd',
-                mode="payment",
-            )
+
+            kwargs = {
+                        'success_url': request.build_absolute_uri(reverse('buy-success')),
+                        'line_items': line_items.data['items'],
+                        'currency': 'usd',
+                        'mode': "payment",
+            }
+            if order.discount:
+                kwargs['discounts'] = [{'coupon': order.discount.stripe}]
+
+            session = stripe.checkout.Session.create(**kwargs)
             return Response({'id': session['id']})
         return Response({'error': 'your cart is empty'})
