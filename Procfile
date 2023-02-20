@@ -1,1 +1,1 @@
-web: python3 manage.py migrate && python3 manage.py createsuperuser --noinput || true && gunicorn test_rishat.wsgi
+web: python3 manage.py migrate && python3 manage.py createsuperuser --noinput || true && python manage.py collectstatic && gunicorn test_rishat.wsgi
