@@ -13,12 +13,12 @@ stripe.api_key = config('STRIPE_KEY')
 
 # Create your views here.
 
-
 def item_retrieve(request, id):
     item = get_object_or_404(Item, id=id)
     cart = request.session.get('cart', [])
     cart_items = Item.objects.filter(id__in=cart)
-    return render(request, 'item.html', {'item': item, 'cart_items': cart_items})
+    return render(request, 'item.html', {'item': item, 'cart_items': cart_items,
+                                         "stripe_key": config('STRIPE_PUBLISH_KEY')})
 
 
 def buy_success(request):
