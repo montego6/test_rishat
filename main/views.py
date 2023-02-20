@@ -1,4 +1,4 @@
-from django.shortcuts import render
+from django.shortcuts import render, get_object_or_404
 from django.urls import reverse
 from django.http import JsonResponse
 from .models import Item, Order, Discount, Tax
@@ -15,7 +15,7 @@ stripe.api_key = config('STRIPE_KEY')
 
 
 def item_retrieve(request, id):
-    item = Item.objects.get(id=id)
+    item = get_object_or_404(Item, id=id)
     cart = request.session.get('cart', [])
     cart_items = Item.objects.filter(id__in=cart)
     return render(request, 'item.html', {'item': item, 'cart_items': cart_items})

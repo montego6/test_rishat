@@ -13,7 +13,6 @@ class Item(models.Model):
     currency = models.CharField(max_length=200, default='usd')
 
     def save(self, *args, **kwargs):
-        super().save(*args, **kwargs)
         product = stripe.Product.create(name=self.name)
 
         if self.currency.lower() == 'usd':
@@ -32,10 +31,11 @@ class Item(models.Model):
 
         if not self._state.adding:
             self.stripe.delete()
+        super().save(*args, **kwargs)
         StripeItem.objects.create(item=self, product=product['id'], price=price['id'])
 
     def __str__(self):
-        return f'{self.name} - {self.price}'
+        return f'{self.id} - {self.name} - {self.price}'
 
     def get_buy_url(self):
         return reverse('buy-item', kwargs={'id': self.id})

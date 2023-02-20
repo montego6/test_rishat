@@ -51,7 +51,7 @@
     <ul id="order-list">
       <p>В вашей корзине:</p>
       {% for item in cart_items %}
-      <li>Item {{item.id}} - {{item.name}}, price: {{item.price}}</li>
+      <li>Item {{item.id}} - {{item.name}}, price: {{item.price}} {{item.currency}}</li>
       {% endfor %}
     </ul>
 
