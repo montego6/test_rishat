@@ -9,7 +9,7 @@
     <button id="buy-button">Buy</button>
     <script src="https://js.stripe.com/v3/"></script>
     <script type="text/javascript">
-      var stripe = Stripe({{stripe_key}})
+      var stripe = Stripe('{{stripe_key}}')
       var buyButton = document.getElementById('buy-button');
       buyButton.addEventListener('click', function() {
         // Create a new Checkout Session using the server-side endpoint
@@ -40,7 +40,7 @@
     </script>
     <button id="make-order-button">Make order</button>
     <script type="text/javascript">
-      var stripe = Stripe({{stripe_key}})
+      var stripe = Stripe('{{stripe_key}}')
       var makeOrderButton = document.getElementById('make-order-button');
       makeOrderButton.addEventListener('click', function() {
         fetch('{% url 'make-order' %}', {method: 'GET'})
