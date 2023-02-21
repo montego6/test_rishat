@@ -56,6 +56,8 @@ def clear_order(request):
 
 class MakeOrderAPIView(APIView):
     def get(self, request):
+        # Тут должна быть какая-то логика, по прикреплению скидки к заказу,
+        # в данном случаем просто выбирается первый объект из таблицы Discount
         discount = Discount.objects.first()
         cart = request.session.get('cart', [])
         if cart:
@@ -63,6 +65,7 @@ class MakeOrderAPIView(APIView):
             order = Order.objects.create()
             order.items.add(*items)
             order.discount = discount
+            # Налог так же выбирается - просто первый объект из таблицы Tax
             order.tax = Tax.objects.first()
             order.save()
             line_items = OrderSerializer(order)
@@ -71,7 +74,7 @@ class MakeOrderAPIView(APIView):
                 'success_url':
                     request.build_absolute_uri(reverse('buy-success')),
                 'line_items': line_items.data['items'],
-                'currency': 'usd',
+                'currency': 'usd', # По умолчанию валюта для заказов доллары
                 'mode': "payment",
             }
             if order.discount:

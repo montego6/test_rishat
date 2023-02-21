@@ -14,7 +14,7 @@ class Item(models.Model):
 
     def save(self, *args, **kwargs):
         product = stripe.Product.create(name=self.name)
-
+        # В данном решении для простоты конвертация валют хардкодится
         if self.currency.lower() == 'usd':
             currency_options = \
                 {'eur': {'unit_amount': int(self.price * 0.93 * 100)}}
@@ -31,6 +31,7 @@ class Item(models.Model):
             currency_options=currency_options,
         )
 
+        # Если модель обновляется, то удаляем связанный stripe объект
         if not self._state.adding:
             self.stripe.delete()
         super().save(*args, **kwargs)
@@ -50,6 +51,7 @@ class Item(models.Model):
         return reverse('add-to-order', kwargs={'id': self.id})
 
 
+# Модель для связывания с Item
 class StripeItem(models.Model):
     item = models.OneToOneField(
         Item,
