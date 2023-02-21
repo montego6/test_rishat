@@ -16,9 +16,11 @@ class Item(models.Model):
         product = stripe.Product.create(name=self.name)
 
         if self.currency.lower() == 'usd':
-            currency_options = {'eur': {'unit_amount': int(self.price * 0.93 * 100)}}
+            currency_options = \
+                {'eur': {'unit_amount': int(self.price * 0.93 * 100)}}
         elif self.currency.lower() == 'eur':
-            currency_options = {'usd': {'unit_amount': int(self.price * 1.07 * 100)}}
+            currency_options = \
+                {'usd': {'unit_amount': int(self.price * 1.07 * 100)}}
         else:
             currency_options = {}
 
@@ -32,7 +34,11 @@ class Item(models.Model):
         if not self._state.adding:
             self.stripe.delete()
         super().save(*args, **kwargs)
-        StripeItem.objects.create(item=self, product=product['id'], price=price['id'])
+        StripeItem.objects.create(
+            item=self,
+            product=product['id'],
+            price=price['id']
+        )
 
     def __str__(self):
         return f'{self.id} - {self.name} - {self.price}'
@@ -45,7 +51,11 @@ class Item(models.Model):
 
 
 class StripeItem(models.Model):
-    item = models.OneToOneField(Item, on_delete=models.CASCADE, related_name='stripe')
+    item = models.OneToOneField(
+        Item,
+        on_delete=models.CASCADE,
+        related_name='stripe'
+    )
     product = models.CharField(max_length=300)
     price = models.CharField(max_length=300)
 
@@ -55,7 +65,11 @@ class StripeItem(models.Model):
 
 class Order(models.Model):
     items = models.ManyToManyField(Item)
-    discount = models.ForeignKey('Discount', on_delete=models.SET_NULL, null=True)
+    discount = models.ForeignKey(
+        'Discount',
+        on_delete=models.SET_NULL,
+        null=True
+    )
     tax = models.ForeignKey('Tax', on_delete=models.SET_NULL, null=True)
 
 
@@ -79,7 +93,11 @@ class Tax(models.Model):
     stripe = models.CharField(max_length=100, null=True, blank=True)
 
     def save(self, *args, **kwargs):
-        tax_rate = stripe.TaxRate.create(display_name=self.name, inclusive=self.inclusive, percentage=self.percentage)
+        tax_rate = stripe.TaxRate.create(
+            display_name=self.name,
+            inclusive=self.inclusive,
+            percentage=self.percentage
+        )
         self.stripe = tax_rate['id']
         super().save(*args, **kwargs)
 

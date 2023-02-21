@@ -17,8 +17,11 @@ def item_retrieve(request, id):
     item = get_object_or_404(Item, id=id)
     cart = request.session.get('cart', [])
     cart_items = Item.objects.filter(id__in=cart)
-    return render(request, 'item.html', {'item': item, 'cart_items': cart_items,
-                                         "stripe_key": config('STRIPE_PUBLISH_KEY')})
+    return render(request, 'item.html', {
+        'item': item,
+        'cart_items': cart_items,
+        'stripe_key': config('STRIPE_PUBLISH_KEY')
+    })
 
 
 def buy_success(request):
@@ -65,10 +68,11 @@ class MakeOrderAPIView(APIView):
             line_items = OrderSerializer(order)
 
             kwargs = {
-                        'success_url': request.build_absolute_uri(reverse('buy-success')),
-                        'line_items': line_items.data['items'],
-                        'currency': 'usd',
-                        'mode': "payment",
+                'success_url':
+                    request.build_absolute_uri(reverse('buy-success')),
+                'line_items': line_items.data['items'],
+                'currency': 'usd',
+                'mode': "payment",
             }
             if order.discount:
                 kwargs['discounts'] = [{'coupon': order.discount.stripe}]

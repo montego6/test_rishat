@@ -1,5 +1,5 @@
 from rest_framework import serializers
-from .models import Order, Item, Tax
+from .models import Order, Item
 
 
 class ItemSerializer(serializers.ModelSerializer):
@@ -28,4 +28,9 @@ class OrderSerializer(serializers.ModelSerializer):
         fields = ('items',)
 
     def get_items(self, obj):
-        return ItemSerializer(obj.items, read_only=True, many=True, context={'order_id': obj.id}).data
+        return ItemSerializer(
+            obj.items,
+            read_only=True,
+            many=True,
+            context={'order_id': obj.id}
+        ).data
